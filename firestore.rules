@@ -1,0 +1,195 @@
+/**
+ * Firestore Security Rules
+ *
+ * Core Philosophy:
+ * This ruleset implements a robust, identity-based security model designed for a marketplace 
+ * connecting Clients and event Professionals. It prioritizes Authorization Independence by 
+ * ensuring that documents (like Quotes and Events) contain the necessary UIDs (clientId, 
+ * professionalId) to make access decisions without recursive lookups.
+ *
+ * Data Structure:
+ * - /clients/{clientId}: Private profiles owned by the client.
+ * - /professionals/{professionalId}: Profiles readable by all, managed by the professional.
+ * - /eventRequests: Top-level collection where clients post needs and professionals browse.
+ * - /quotes: Top-level collection linking requests to professional offers.
+ * - /events: Top-level collection for confirmed bookings.
+ * - /professionals/{proId}/reviews: Public feedback for professionals.
+ * - /professionals/{proId}/notifications: Private inbox for professional updates.
+ *
+ * Key Security Decisions:
+ * - Denormalization: Critical IDs (clientId, professionalId) are required on documents to 
+ *   enable fast, single-document authorization checks.
+ * - Public Read/Private Write: Professional profiles and reviews are public to allow 
+ *   discovery, while writes are strictly restricted to the respective owners.
+ * - Cross-Party Access: Entities like Events and Quotes grant read access to both the 
+ *   Client and the Professional involved.
+ * - Prototyping Flexibility: Rules enforce WHO can access data and relational integrity 
+ *   (e.g., matching UIDs), but do not strictly validate the internal data schema.
+ */
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- GLOBAL HELPER FUNCTIONS ---
+
+    /** @description Checks if the user is authenticated. */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /** @description Checks if the user's UID matches the provided ID. */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /** @description Checks if the user is the owner of an existing document. */
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
+    }
+
+    /** @description Checks if the user is either the client or the professional on a document. */
+    function isPartyTo(clientId, proId) {
+      return isOwner(clientId) || isOwner(proId);
+    }
+
+    // --- COLLECTION RULES ---
+
+    /**
+     * @description Rules for Client profiles. Only the client can manage their own profile.
+     * @path /clients/{clientId}
+     * @allow get, list, create, update, delete: if isOwner(clientId)
+     * @deny Any access if the auth UID does not match the clientId path variable.
+     * @principle Ownership-based access for private user data.
+     */
+    match /clients/{clientId} {
+      allow get, list: if isOwner(clientId);
+      allow create: if isOwner(clientId) && request.resource.data.id == clientId;
+      allow update: if isExistingOwner(clientId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(clientId);
+    }
+
+    /**
+     * @description Rules for Professional profiles. Publicly readable, writeable only by the pro.
+     * @path /professionals/{professionalId}
+     * @allow get, list: if isSignedIn()
+     * @allow create, update, delete: if isOwner(professionalId)
+     * @deny Writes if the auth UID does not match the professionalId path variable.
+     * @principle Public profile with owner-only management.
+     */
+    match /professionals/{professionalId} {
+      allow get, list: if isSignedIn();
+      allow create: if isOwner(professionalId) && request.resource.data.id == professionalId;
+      allow update: if isExistingOwner(professionalId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(professionalId);
+
+      /**
+       * @description Professional's availability entries.
+       * @path /professionals/{professionalId}/availabilityEntries/{entryId}
+       * @allow get, list: if isSignedIn()
+       * @allow create, update, delete: if isOwner(professionalId)
+       * @principle Path-based ownership for subcollections.
+       */
+      match /availabilityEntries/{entryId} {
+        allow get, list: if isSignedIn();
+        allow create: if isOwner(professionalId);
+        allow update, delete: if isExistingOwner(professionalId);
+      }
+
+      /**
+       * @description Public reviews for professionals.
+       * @path /professionals/{professionalId}/reviews/{reviewId}
+       * @allow get, list: if true
+       * @allow create: if isOwner(request.resource.data.clientId)
+       * @allow update, delete: if isExistingOwner(resource.data.clientId)
+       * @principle Publicly readable reviews with owner-only writes.
+       */
+      match /reviews/{reviewId} {
+        allow get, list: if true;
+        allow create: if isOwner(request.resource.data.clientId);
+        allow update: if isExistingOwner(resource.data.clientId) && request.resource.data.clientId == resource.data.clientId;
+        allow delete: if isExistingOwner(resource.data.clientId);
+      }
+
+      /**
+       * @description Notifications for professionals.
+       * @path /professionals/{professionalId}/notifications/{notificationId}
+       * @allow create: if isSignedIn()
+       * @allow get, list, update, delete: if isOwner(professionalId)
+       * @principle Recipient-only access for private notifications.
+       */
+      match /notifications/{notificationId} {
+        allow create: if isSignedIn();
+        allow get, list: if isOwner(professionalId);
+        allow update: if isExistingOwner(professionalId);
+        allow delete: if isExistingOwner(professionalId);
+      }
+    }
+
+    /**
+     * @description Event requests created by clients. Professionals browse to find work.
+     * @path /eventRequests/{eventRequestId}
+     * @allow create: if isOwner(request.resource.data.clientId)
+     * @allow get, list: if isSignedIn()
+     * @allow update, delete: if isExistingOwner(resource.data.clientId)
+     * @principle Shared visibility for discovery with restricted owner management.
+     */
+    match /eventRequests/{eventRequestId} {
+      allow get, list: if isSignedIn();
+      allow create: if isOwner(request.resource.data.clientId);
+      allow update: if isExistingOwner(resource.data.clientId) && request.resource.data.clientId == resource.data.clientId;
+      allow delete: if isExistingOwner(resource.data.clientId);
+    }
+
+    /**
+     * @description Quotes sent by professionals to clients.
+     * @path /quotes/{quoteId}
+     * @allow create: if isOwner(request.resource.data.professionalId)
+     * @allow get, list: if isPartyTo(resource.data.clientId, resource.data.professionalId)
+     * @allow update, delete: if isExistingOwner(resource.data.professionalId)
+     * @principle Collaborative document access using denormalized IDs.
+     */
+    match /quotes/{quoteId} {
+      allow get, list: if isPartyTo(resource.data.clientId, resource.data.professionalId);
+      allow create: if isOwner(request.resource.data.professionalId);
+      allow update: if isExistingOwner(resource.data.professionalId) && request.resource.data.professionalId == resource.data.professionalId;
+      allow delete: if isExistingOwner(resource.data.professionalId);
+    }
+
+    /**
+     * @description Confirmed events between clients and professionals.
+     * @path /events/{eventId}
+     * @allow get, list: if isPartyTo(resource.data.clientId, resource.data.professionalId)
+     * @allow create, update, delete: if false // TODO: Finalize event creation logic (e.g., via trigger)
+     * @principle Read access for both participants; restricted direct writes.
+     */
+    match /events/{eventId} {
+      allow get, list: if isPartyTo(resource.data.clientId, resource.data.professionalId);
+      allow create, update, delete: if false; 
+    }
+
+    /**
+     * @description Read-only lookup data for service categories.
+     * @path /serviceCategories/{id}
+     * @allow get, list: if true
+     * @allow create, update, delete: if false
+     * @principle Publicly accessible read-only administrative data.
+     */
+    match /serviceCategories/{id} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Read-only lookup data for event types.
+     * @path /eventTypes/{id}
+     * @allow get, list: if true
+     * @allow create, update, delete: if false
+     * @principle Publicly accessible read-only administrative data.
+     */
+    match /eventTypes/{id} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+  }
+}

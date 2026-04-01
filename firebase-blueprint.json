@@ -1,0 +1,706 @@
+{
+  "entities": {
+    "Client": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Client",
+      "type": "object",
+      "description": "Represents a client user who is looking to organize an event and find professionals.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Client entity."
+        },
+        "firstName": {
+          "type": "string",
+          "description": "The client's first name."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "The client's last name."
+        },
+        "email": {
+          "type": "string",
+          "description": "The client's email address, used for communication.",
+          "format": "email"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "The client's phone number."
+        },
+        "profileImageUrl": {
+          "type": "string",
+          "description": "URL to the client's profile picture.",
+          "format": "uri"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the client's profile was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "firstName",
+        "lastName",
+        "email",
+        "createdAt"
+      ]
+    },
+    "Professional": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Professional",
+      "type": "object",
+      "description": "Represents an event professional offering services (e.g., DJ, Caterer, Photographer).",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Professional entity."
+        },
+        "firstName": {
+          "type": "string",
+          "description": "The professional's first name."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "The professional's last name."
+        },
+        "email": {
+          "type": "string",
+          "description": "The professional's email address, used for communication and login.",
+          "format": "email"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "The professional's phone number."
+        },
+        "companyName": {
+          "type": "string",
+          "description": "The name of the professional's company or business, if applicable."
+        },
+        "serviceCategoryIds": {
+          "type": "array",
+          "description": "References to ServiceCategory entities indicating the types of services the professional offers. (Relationship: Professional N:N ServiceCategory)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "profileImageUrl": {
+          "type": "string",
+          "description": "URL to the professional's profile picture or company logo.",
+          "format": "uri"
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description or biography of the professional's services and experience."
+        },
+        "websiteUrl": {
+          "type": "string",
+          "description": "The professional's official website URL.",
+          "format": "uri"
+        },
+        "location": {
+          "type": "string",
+          "description": "The primary city or region where the professional operates."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the professional's profile was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "firstName",
+        "lastName",
+        "email",
+        "serviceCategoryIds",
+        "location",
+        "createdAt"
+      ]
+    },
+    "ServiceCategory": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ServiceCategory",
+      "type": "object",
+      "description": "Defines a category of event services or professional types (e.g., DJ, Traiteur, Photographer).",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ServiceCategory entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the service category (e.g., 'DJ', 'Traiteur', 'Wedding Planner')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the service category."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "EventType": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "EventType",
+      "type": "object",
+      "description": "Defines a type of event that clients might organize (e.g., Mariage, Anniversaire, Corporate Party).",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the EventType entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the event type (e.g., 'Mariage', 'Anniversaire', 'Soirée entreprise')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the event type."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "EventRequest": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "EventRequest",
+      "type": "object",
+      "description": "A client's detailed request for event services, published to professionals.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the EventRequest entity."
+        },
+        "clientId": {
+          "type": "string",
+          "description": "Reference to the Client who created this request. (Relationship: Client 1:N EventRequest)"
+        },
+        "eventTypeId": {
+          "type": "string",
+          "description": "Reference to the EventType for this request. (Relationship: EventType 1:N EventRequest)"
+        },
+        "date": {
+          "type": "string",
+          "description": "The requested date for the event.",
+          "format": "date"
+        },
+        "location": {
+          "type": "string",
+          "description": "The desired city or area for the event."
+        },
+        "budget": {
+          "type": "number",
+          "description": "The client's estimated budget for the event services."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the client's event needs and preferences."
+        },
+        "requestedServiceCategoryIds": {
+          "type": "array",
+          "description": "References to ServiceCategory entities indicating the types of professionals the client is looking for. (Relationship: EventRequest N:N ServiceCategory)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the event request (e.g., 'open', 'quoted', 'accepted', 'closed', 'cancelled')."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the event request was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the event request was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "clientId",
+        "eventTypeId",
+        "date",
+        "location",
+        "budget",
+        "description",
+        "requestedServiceCategoryIds",
+        "status",
+        "createdAt"
+      ]
+    },
+    "Quote": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Quote",
+      "type": "object",
+      "description": "A detailed offer sent by a professional in response to an EventRequest.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Quote entity."
+        },
+        "eventRequestId": {
+          "type": "string",
+          "description": "Reference to the EventRequest this quote is for. (Relationship: EventRequest 1:N Quote)"
+        },
+        "professionalId": {
+          "type": "string",
+          "description": "Reference to the Professional who sent this quote. (Relationship: Professional 1:N Quote)"
+        },
+        "price": {
+          "type": "number",
+          "description": "The total price quoted for the services."
+        },
+        "details": {
+          "type": "string",
+          "description": "A detailed description of the services included in the quote."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the quote (e.g., 'sent', 'viewed', 'accepted', 'rejected', 'signed')."
+        },
+        "validUntil": {
+          "type": "string",
+          "description": "The date and time until which the quote is valid.",
+          "format": "date-time"
+        },
+        "pdfUrl": {
+          "type": "string",
+          "description": "URL to the PDF version of the quote for download.",
+          "format": "uri"
+        },
+        "isSigned": {
+          "type": "boolean",
+          "description": "Indicates if the quote has been electronically signed by the client."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the quote was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the quote was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "eventRequestId",
+        "professionalId",
+        "price",
+        "details",
+        "status",
+        "validUntil",
+        "createdAt"
+      ]
+    },
+    "Event": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Event",
+      "type": "object",
+      "description": "A confirmed and scheduled event, resulting from an accepted and signed Quote.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Event entity."
+        },
+        "eventRequestId": {
+          "type": "string",
+          "description": "Reference to the original EventRequest that led to this event. (Relationship: EventRequest 1:1 Event)"
+        },
+        "quoteId": {
+          "type": "string",
+          "description": "Reference to the accepted Quote that finalized this event. (Relationship: Quote 1:1 Event)"
+        },
+        "clientId": {
+          "type": "string",
+          "description": "Reference to the Client organizing this event. (Relationship: Client 1:N Event)"
+        },
+        "professionalId": {
+          "type": "string",
+          "description": "Reference to the Professional providing services for this event. (Relationship: Professional 1:N Event)"
+        },
+        "eventTypeId": {
+          "type": "string",
+          "description": "Reference to the EventType for this event. (Relationship: EventType 1:N Event)"
+        },
+        "date": {
+          "type": "string",
+          "description": "The confirmed date of the event.",
+          "format": "date"
+        },
+        "location": {
+          "type": "string",
+          "description": "The confirmed location of the event."
+        },
+        "price": {
+          "type": "number",
+          "description": "The final agreed price for the event services."
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of the confirmed event."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the event (e.g., 'upcoming', 'completed', 'cancelled')."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the event record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the event record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "eventRequestId",
+        "quoteId",
+        "clientId",
+        "professionalId",
+        "eventTypeId",
+        "date",
+        "location",
+        "price",
+        "status",
+        "createdAt"
+      ]
+    },
+    "AvailabilityEntry": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "AvailabilityEntry",
+      "type": "object",
+      "description": "Records a professional's availability or unavailability for a specific date.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the AvailabilityEntry entity."
+        },
+        "professionalId": {
+          "type": "string",
+          "description": "Reference to the Professional whose availability this entry concerns. (Relationship: Professional 1:N AvailabilityEntry)"
+        },
+        "date": {
+          "type": "string",
+          "description": "The specific date for which availability is recorded.",
+          "format": "date"
+        },
+        "isAvailable": {
+          "type": "boolean",
+          "description": "Indicates whether the professional is available (true) or unavailable (false) on this date."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional notes regarding the availability for this date (e.g., 'booked for another event', 'vacation')."
+        },
+        "relatedEventId": {
+          "type": "string",
+          "description": "Optional reference to an Event entity if the unavailability is due to a confirmed booking. (Relationship: Event 1:N AvailabilityEntry)"
+        }
+      },
+      "required": [
+        "id",
+        "professionalId",
+        "date",
+        "isAvailable"
+      ]
+    },
+    "Review": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Review",
+      "type": "object",
+      "description": "Feedback (rating and comment) provided by a client for a professional after an event.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Review entity."
+        },
+        "clientId": {
+          "type": "string",
+          "description": "Reference to the Client who submitted this review. (Relationship: Client 1:N Review)"
+        },
+        "professionalId": {
+          "type": "string",
+          "description": "Reference to the Professional who is being reviewed. (Relationship: Professional 1:N Review)"
+        },
+        "eventId": {
+          "type": "string",
+          "description": "Reference to the specific Event for which this review was given. (Relationship: Event 1:N Review)"
+        },
+        "rating": {
+          "type": "number",
+          "description": "The numerical rating given by the client (e.g., 1-5 stars)."
+        },
+        "comment": {
+          "type": "string",
+          "description": "The textual feedback or comment provided by the client."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the review was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "clientId",
+        "professionalId",
+        "eventId",
+        "rating",
+        "comment",
+        "createdAt"
+      ]
+    },
+    "Notification": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Notification",
+      "type": "object",
+      "description": "Communicates important updates or actions to a specific user (e.g., a new review, a new event request).",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Notification entity."
+        },
+        "recipientProfessionalId": {
+          "type": "string",
+          "description": "Reference to the Professional who is the intended recipient of this notification. (Relationship: Professional 1:N Notification)"
+        },
+        "type": {
+          "type": "string",
+          "description": "The category or type of the notification (e.g., 'new_review', 'new_event_request', 'quote_accepted')."
+        },
+        "message": {
+          "type": "string",
+          "description": "The display message content of the notification."
+        },
+        "link": {
+          "type": "string",
+          "description": "An optional internal URI within the app to direct the user to the relevant content.",
+          "format": "uri"
+        },
+        "isRead": {
+          "type": "boolean",
+          "description": "Indicates whether the recipient has read this notification."
+        },
+        "sourceId": {
+          "type": "string",
+          "description": "The ID of the entity that triggered this notification (e.g., a Review ID, an EventRequest ID)."
+        },
+        "sourceEntityType": {
+          "type": "string",
+          "description": "The type of the entity that triggered this notification (e.g., 'Review', 'EventRequest')."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the notification was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "recipientProfessionalId",
+        "type",
+        "message",
+        "isRead",
+        "sourceId",
+        "sourceEntityType",
+        "createdAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/clients/{clientId}",
+        "definition": {
+          "entityName": "Client",
+          "schema": {
+            "$ref": "#/backend/entities/Client"
+          },
+          "description": "Stores individual client user profiles. The document ID MUST match the Firebase Authentication UID of the client. Only the authenticated client can read/write their own profile.",
+          "params": [
+            {
+              "name": "clientId",
+              "description": "The unique identifier of the client, corresponding to their Firebase Authentication UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/professionals/{professionalId}",
+        "definition": {
+          "entityName": "Professional",
+          "schema": {
+            "$ref": "#/backend/entities/Professional"
+          },
+          "description": "Stores individual professional user profiles. The document ID MUST match the Firebase Authentication UID of the professional. Only the authenticated professional can read/write their own profile.",
+          "params": [
+            {
+              "name": "professionalId",
+              "description": "The unique identifier of the professional, corresponding to their Firebase Authentication UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/serviceCategories/{serviceCategoryId}",
+        "definition": {
+          "entityName": "ServiceCategory",
+          "schema": {
+            "$ref": "#/backend/entities/ServiceCategory"
+          },
+          "description": "Public lookup data for different categories of services (e.g., DJ, Caterer). These documents are generally read-only for all users and managed by administrators.",
+          "params": [
+            {
+              "name": "serviceCategoryId",
+              "description": "The unique identifier of the service category."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/eventTypes/{eventTypeId}",
+        "definition": {
+          "entityName": "EventType",
+          "schema": {
+            "$ref": "#/backend/entities/EventType"
+          },
+          "description": "Public lookup data for different types of events (e.g., Mariage, Anniversaire). These documents are generally read-only for all users and managed by administrators.",
+          "params": [
+            {
+              "name": "eventTypeId",
+              "description": "The unique identifier of the event type."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/eventRequests/{eventRequestId}",
+        "definition": {
+          "entityName": "EventRequest",
+          "schema": {
+            "$ref": "#/backend/entities/EventRequest"
+          },
+          "description": "Stores client event requests. Clients can create, read, and update their own requests (verified via 'clientId' field). Professionals can list and read relevant open requests. Includes denormalized 'clientId' for authorization independence and efficient QAPs.",
+          "params": [
+            {
+              "name": "eventRequestId",
+              "description": "The unique identifier for the event request."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/quotes/{quoteId}",
+        "definition": {
+          "entityName": "Quote",
+          "schema": {
+            "$ref": "#/backend/entities/Quote"
+          },
+          "description": "Stores quotes submitted by professionals in response to event requests. Includes denormalized 'eventRequestId' and 'professionalId' for authorization independence. Clients (via 'eventRequestId') and Professionals (via 'professionalId') can query and manage their respective quotes efficiently.",
+          "params": [
+            {
+              "name": "quoteId",
+              "description": "The unique identifier for the quote."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/events/{eventId}",
+        "definition": {
+          "entityName": "Event",
+          "schema": {
+            "$ref": "#/backend/entities/Event"
+          },
+          "description": "Stores confirmed and scheduled events. Includes denormalized 'clientId' and 'professionalId' for authorization independence, allowing both the client and professional involved to query and access their respective events efficiently.",
+          "params": [
+            {
+              "name": "eventId",
+              "description": "The unique identifier for the confirmed event."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/professionals/{professionalId}/availabilityEntries/{availabilityEntryId}",
+        "definition": {
+          "entityName": "AvailabilityEntry",
+          "schema": {
+            "$ref": "#/backend/entities/AvailabilityEntry"
+          },
+          "description": "Records a professional's availability or unavailability. Only the owning professional can manage these entries, with 'professionalId' implicitly provided by the path for authorization.",
+          "params": [
+            {
+              "name": "professionalId",
+              "description": "The unique identifier of the professional owner of this availability entry."
+            },
+            {
+              "name": "availabilityEntryId",
+              "description": "The unique identifier for the availability entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/professionals/{professionalId}/reviews/{reviewId}",
+        "definition": {
+          "entityName": "Review",
+          "schema": {
+            "$ref": "#/backend/entities/Review"
+          },
+          "description": "Stores client reviews for professionals. Reviews are publicly readable. Write access is restricted to the 'clientId' who owns the review. Includes denormalized 'clientId', 'professionalId', and 'eventId' for authorization independence and efficient QAPs (e.g., displaying all reviews for a professional).",
+          "params": [
+            {
+              "name": "professionalId",
+              "description": "The unique identifier of the professional being reviewed."
+            },
+            {
+              "name": "reviewId",
+              "description": "The unique identifier for the review."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/professionals/{professionalId}/notifications/{notificationId}",
+        "definition": {
+          "entityName": "Notification",
+          "schema": {
+            "$ref": "#/backend/entities/Notification"
+          },
+          "description": "Stores notifications specifically for professionals. Only the recipient professional can read and manage their own notifications, with 'professionalId' implicitly provided by the path for authorization.",
+          "params": [
+            {
+              "name": "professionalId",
+              "description": "The unique identifier of the professional recipient of the notification."
+            },
+            {
+              "name": "notificationId",
+              "description": "The unique identifier for the notification."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The proposed Firestore structure prioritizes Authorization Independence and Queryable Access Patterns (QAPs) by strategically leveraging top-level collections for entities with multi-party access and subcollections for tightly coupled, user-specific data. This approach minimizes the need for `get()` operations in security rules, enhancing rule simplicity, robustness, and debuggability.\n\n**Authorization Independence:**\n*   For entities like `EventRequest`, `Quote`, and `Event`, which involve interactions between `Client` and `Professional` entities, a top-level collection (`/eventRequests`, `/quotes`, `/events`) is used. Crucially, each document in these collections includes explicit `clientId` and `professionalId` (where applicable) fields. This denormalization ensures that all authorization decisions can be made by inspecting the document itself, without needing to retrieve parent documents or perform cross-collection lookups, thereby fully supporting Authorization Independence.\n*   For `Review` documents, which are explicitly tied to a `Professional`'s profile, they are stored as a subcollection (`/professionals/{professionalId}/reviews/{reviewId}`). The `Review` document itself still contains `clientId`, `professionalId`, and `eventId`, allowing rules to verify the reviewer's identity and the target professional without needing to fetch the parent `professional` document. This allows a client to atomicaly write a review, and the professional to display it.\n*   Similarly, `Notification` documents, which are private to a specific professional, are stored under their profile (`/professionals/{professionalId}/notifications/{notificationId}`). The `recipientProfessionalId` field in the document (also implicitly present in the path `professionalId`) guarantees that authorization can be determined solely from the request and the document data.\n*   `AvailabilityEntry` documents are also private to a professional and structured as a subcollection `/professionals/{professionalId}/availabilityEntries/{availabilityEntryId}`, ensuring `professionalId` is part of the path.\n\n**Queryable Access Patterns (QAPs):**\n*   **Top-level Collections for Multi-Party Entities:**\n    *   `/eventRequests`: Clients can query their own requests using `where('clientId', '==', request.auth.uid)`. Professionals can query for relevant open requests by filtering on `status`, `location`, and `requestedServiceCategoryIds`. The fields are all within the `EventRequest` document, allowing for efficient, indexed queries.\n    *   `/quotes`: Clients can query quotes for a specific request using `where('eventRequestId', '==', clientEventRequestId)`. Professionals can query all quotes they've sent using `where('professionalId', '==', request.auth.uid)`. This structure supports both perspectives with robust queries.\n    *   `/events`: Both clients and professionals can easily query for their respective confirmed events using `where('clientId', '==', request.auth.uid)` or `where('professionalId', '==', request.auth.uid)`. This fulfills the requirement for listing user-specific events efficiently.\n*   **Subcollections for Direct Ownership/Targeting:**\n    *   `/professionals/{professionalId}/reviews`: This path directly supports the requirement for displaying reviews on a professional's profile. Listing all reviews for a professional is a simple path-based query. Write access can be controlled by `review.clientId == request.auth.uid` and potentially checking the associated `Event` status to confirm completion.\n    *   `/professionals/{professionalId}/notifications`: This enables a professional to retrieve their unread notifications efficiently via a path-based query.\n    *   `/professionals/{professionalId}/availabilityEntries`: A professional can manage and list their availability directly.\n\n**Structural Segregation & Access Modeling:**\n*   Separate top-level collections for `clients` and `professionals` enforce distinct user roles, with their `id` matching `request.auth.uid` for simple `read`/`write` access to their own profiles.\n*   `serviceCategories` and `eventTypes` are public, read-only lookup collections, adhering to homogeneous security posture.\n*   All wildcards are descriptive (`{clientId}`, `{professionalId}`, `{eventRequestId}`), enhancing clarity and debuggability. Explicit state modeling with a `status` field is used consistently across entities like `EventRequest`, `Quote`, and `Event`."
+  }
+}

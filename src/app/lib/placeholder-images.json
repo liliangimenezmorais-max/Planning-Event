@@ -1,0 +1,41 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "wedding",
+      "description": "Décoration de mariage élégante",
+      "imageUrl": "https://picsum.photos/seed/wedding-setup/800/600",
+      "imageHint": "wedding decor"
+    },
+    {
+      "id": "dj-turntables",
+      "description": "Platine DJ professionnelle avec casque noir et blanc",
+      "imageUrl": "https://picsum.photos/seed/dj-deck-pro/800/600",
+      "imageHint": "dj turntables"
+    },
+    {
+      "id": "catering",
+      "description": "Buffet traiteur événementiel avec mignardises",
+      "imageUrl": "https://picsum.photos/seed/catering-buffet/800/600",
+      "imageHint": "catering food"
+    },
+    {
+      "id": "photography",
+      "description": "Appareil photo reflex professionnel",
+      "imageUrl": "https://picsum.photos/seed/camera-pro/800/600",
+      "imageHint": "camera lens"
+    },
+    {
+      "id": "instrument",
+      "description": "Touches de piano en gros plan",
+      "imageUrl": "https://picsum.photos/seed/piano-keys/800/600",
+      "imageHint": "piano instrument"
+    },
+    {
+      "id": "hero",
+      "description": "Célébration festive entre amis",
+      "imageUrl": "https://picsum.photos/seed/party-vibes/1200/800",
+      "imageHint": "people celebration"
+    }
+  ]
+}
